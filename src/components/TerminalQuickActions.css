@@ -67,6 +67,9 @@
 .qa-toggle-btn,
 .qa-collapse-btn {
   color: rgba(160, 185, 220, 0.6);
+}
+
+.qa-collapse-btn {
   border-color: rgba(100, 160, 255, 0.15);
 }
 
