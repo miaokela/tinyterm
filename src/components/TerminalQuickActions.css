@@ -1,39 +1,105 @@
-.quick-actions-wrapper {
+/* ── Icon Button Bar ─────────────────────────────────────────────────────── */
+
+.qa-bar {
   position: absolute;
   top: 10px;
   right: 10px;
   z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 3px;
+  border-radius: 8px;
+  background: rgba(20, 30, 48, 0.82);
+  border: 1px solid rgba(100, 160, 255, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   pointer-events: auto;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.quick-actions-toggle {
+.qa-bar.expanded {
+  animation: qaBarExpand 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes qaBarExpand {
+  from {
+    width: 24px;
+    opacity: 0.7;
+  }
+  to {
+    width: auto;
+    opacity: 1;
+  }
+}
+
+.qa-icon-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: rgba(20, 30, 48, 0.82);
-  border: 1px solid rgba(100, 160, 255, 0.22);
-  color: rgba(180, 200, 240, 0.85);
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: rgba(180, 200, 240, 0.7);
   cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
-.quick-actions-toggle:hover {
-  background: rgba(36, 56, 88, 0.9);
-  border-color: rgba(100, 160, 255, 0.45);
+.qa-icon-btn:hover {
+  background: rgba(60, 100, 160, 0.28);
+  border-color: rgba(100, 160, 255, 0.3);
   color: rgba(220, 235, 255, 0.95);
-  transform: scale(1.08);
 }
 
-.quick-actions-toggle:active {
-  transform: scale(0.95);
+.qa-icon-btn:active {
+  transform: scale(0.9);
 }
 
-.quick-actions-panel {
+.qa-icon-btn.active {
+  background: rgba(60, 110, 180, 0.35);
+  border-color: rgba(100, 170, 255, 0.4);
+  color: rgba(220, 235, 255, 0.95);
+}
+
+.qa-toggle-btn,
+.qa-collapse-btn {
+  color: rgba(160, 185, 220, 0.6);
+  border-color: rgba(100, 160, 255, 0.15);
+}
+
+.qa-toggle-btn:hover,
+.qa-collapse-btn:hover {
+  color: rgba(220, 235, 255, 0.95);
+  border-color: rgba(100, 160, 255, 0.35);
+}
+
+/* Slide-in animation for expanded buttons */
+.qa-slide-in {
+  opacity: 0;
+  transform: translateX(8px);
+  animation: qaSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes qaSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ── Popup Panel (shared) ───────────────────────────────────────────────── */
+
+.qa-popup {
+  position: absolute;
+  top: 40px;
+  right: 10px;
   width: 260px;
   max-height: 70vh;
   display: flex;
@@ -47,10 +113,20 @@
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   overflow: hidden;
-  animation: quickPanelIn 0.15s ease-out;
+  z-index: 20;
+  pointer-events: auto;
+  animation: qaPopupIn 0.15s ease-out;
 }
 
-@keyframes quickPanelIn {
+.qa-popup-history {
+  width: 300px;
+}
+
+.qa-popup.fm-open {
+  max-height: 45vh;
+}
+
+@keyframes qaPopupIn {
   from {
     opacity: 0;
     transform: scale(0.96) translateY(-4px);
@@ -61,7 +137,7 @@
   }
 }
 
-.quick-actions-header {
+.qa-popup-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -70,16 +146,13 @@
   flex-shrink: 0;
 }
 
-.quick-actions-title {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.qa-popup-title {
   font-size: 11px;
   font-weight: 600;
   color: rgba(180, 200, 240, 0.9);
 }
 
-.quick-actions-close {
+.qa-popup-close {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -93,101 +166,50 @@
   transition: all 0.15s;
 }
 
-.quick-actions-close:hover {
+.qa-popup-close:hover {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(220, 235, 255, 0.9);
 }
 
-.quick-actions-section {
-  padding: 8px 10px;
-  flex-shrink: 0;
-}
-
-.quick-actions-section + .quick-actions-section {
-  border-top: 1px solid rgba(100, 160, 255, 0.08);
-}
-
-.quick-actions-section-title {
-  font-size: 10px;
-  font-weight: 500;
-  color: rgba(140, 165, 200, 0.6);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.quick-actions-buttons {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-}
-
-.quick-action-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px 9px;
-  border-radius: 6px;
-  background: rgba(60, 100, 160, 0.12);
-  border: 1px solid rgba(100, 160, 255, 0.12);
-  color: rgba(180, 205, 240, 0.82);
-  font-size: 11px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.quick-action-btn:hover {
-  background: rgba(60, 110, 180, 0.28);
-  border-color: rgba(100, 170, 255, 0.35);
-  color: rgba(210, 230, 255, 0.95);
-}
-
-.quick-action-btn:active {
-  transform: scale(0.96);
-}
-
-/* Scrollable command list */
-.quick-actions-scroll {
-  max-height: 320px;
+.qa-popup-scroll {
+  max-height: 50vh;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-right: 2px;
-  transition: max-height 0.2s ease;
+  padding: 6px 8px;
 }
 
-/* When file manager is open, shrink the panel to avoid being clipped */
-.quick-actions-panel.fm-open .quick-actions-scroll {
-  max-height: 140px;
+.qa-popup.fm-open .qa-popup-scroll {
+  max-height: 28vh;
 }
 
-.quick-actions-scroll::-webkit-scrollbar {
+.qa-popup-scroll::-webkit-scrollbar {
   width: 5px;
 }
 
-.quick-actions-scroll::-webkit-scrollbar-track {
+.qa-popup-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.quick-actions-scroll::-webkit-scrollbar-thumb {
+.qa-popup-scroll::-webkit-scrollbar-thumb {
   background: rgba(100, 160, 255, 0.18);
   border-radius: 3px;
 }
 
-.quick-actions-scroll::-webkit-scrollbar-thumb:hover {
+.qa-popup-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 160, 255, 0.32);
 }
 
-.quick-actions-cat {
+/* ── Commands List ──────────────────────────────────────────────────────── */
+
+.qa-cat {
   margin-bottom: 8px;
 }
 
-.quick-actions-cat:last-child {
+.qa-cat:last-child {
   margin-bottom: 0;
 }
 
-.quick-actions-cat-title {
+.qa-cat-title {
   font-size: 10px;
   font-weight: 600;
   color: rgba(120, 150, 195, 0.55);
@@ -196,13 +218,13 @@
   letter-spacing: 0.2px;
 }
 
-.quick-actions-cat-items {
+.qa-cat-items {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.quick-actions-item {
+.qa-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -216,16 +238,16 @@
   user-select: none;
 }
 
-.quick-actions-item:hover {
+.qa-item:hover {
   background: rgba(60, 100, 160, 0.14);
   border-color: rgba(100, 160, 255, 0.15);
 }
 
-.quick-actions-item:active {
+.qa-item:active {
   background: rgba(60, 100, 160, 0.22);
 }
 
-.quick-actions-item-cmd {
+.qa-item-cmd {
   font-family: var(--font-mono, 'Menlo', monospace);
   font-size: 10px;
   color: rgba(160, 190, 230, 0.72);
@@ -235,8 +257,120 @@
   max-width: 140px;
 }
 
-.quick-actions-item-label {
+.qa-item-label {
   font-size: 10px;
   color: rgba(130, 160, 200, 0.55);
   flex-shrink: 0;
+}
+
+/* ── History List ───────────────────────────────────────────────────────── */
+
+.qa-history-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid transparent;
+  transition: all 0.12s;
+}
+
+.qa-history-item:hover {
+  background: rgba(60, 100, 160, 0.14);
+  border-color: rgba(100, 160, 255, 0.15);
+}
+
+.qa-history-cmd {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono, 'Menlo', monospace);
+  font-size: 10px;
+  color: rgba(160, 190, 230, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  user-select: none;
+}
+
+.qa-history-cmd:hover {
+  color: rgba(200, 220, 255, 0.9);
+}
+
+.qa-history-exec {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  background: rgba(60, 100, 160, 0.12);
+  border: 1px solid rgba(100, 160, 255, 0.12);
+  color: rgba(160, 200, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.qa-history-exec:hover {
+  background: rgba(80, 180, 120, 0.28);
+  border-color: rgba(80, 180, 120, 0.45);
+  color: rgba(160, 255, 180, 0.95);
+}
+
+.qa-history-exec:active {
+  transform: scale(0.88);
+}
+
+.qa-history-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 0;
+  color: rgba(160, 185, 220, 0.6);
+  font-size: 11px;
+}
+
+.qa-spin {
+  animation: qaSpin 0.8s linear infinite;
+}
+
+@keyframes qaSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.qa-history-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 0;
+  color: rgba(240, 130, 130, 0.8);
+  font-size: 11px;
+}
+
+.qa-history-retry {
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(60, 100, 160, 0.2);
+  border: 1px solid rgba(100, 160, 255, 0.2);
+  color: rgba(180, 205, 240, 0.85);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.qa-history-retry:hover {
+  background: rgba(60, 110, 180, 0.35);
+  border-color: rgba(100, 170, 255, 0.4);
+}
+
+.qa-history-empty {
+  text-align: center;
+  padding: 20px 0;
+  color: rgba(140, 165, 200, 0.5);
+  font-size: 11px;
 }

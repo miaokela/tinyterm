@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { Command, X, Cpu, HardDrive, Database, Terminal } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { Cpu, HardDrive, Database, BookText, Clock, Play, X, Loader2, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { invoke } from '@tauri-apps/api/core'
 import { SystemInfoModal, type QueryType } from './SystemInfoModal'
 import './TerminalQuickActions.css'
 
@@ -12,7 +13,6 @@ interface Props {
 interface CommandItem {
   label: string
   command: string
-  description?: string
 }
 
 interface CommandCategory {
@@ -103,113 +103,286 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
   },
 ]
 
+type ActivePopup = null | 'commands' | 'history'
+
 export function TerminalQuickActions({ sessionId, onWrite, fmOpen }: Props) {
-  const [open, setOpen] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [activePopup, setActivePopup] = useState<ActivePopup>(null)
   const [sysInfoType, setSysInfoType] = useState<QueryType | null>(null)
 
-  const handleInput = (cmd: string) => {
-    onWrite(cmd)
+  const togglePopup = (popup: ActivePopup) => {
+    setActivePopup(prev => (prev === popup ? null : popup))
   }
 
-  const handleOpenSysInfo = (type: QueryType) => {
-    setSysInfoType(type)
-  }
-
-  const handleCloseSysInfo = () => {
-    setSysInfoType(null)
+  const handleToggleExpand = () => {
+    setExpanded(prev => {
+      if (prev) setActivePopup(null) // close any popup when collapsing
+      return !prev
+    })
   }
 
   return (
     <>
-      <div className="quick-actions-wrapper">
-        {!open ? (
+      <div className={`qa-bar${expanded ? ' expanded' : ''}`}>
+        {/* Collapsed state: single toggle button */}
+        {!expanded && (
           <button
-            className="quick-actions-toggle"
-            onClick={() => setOpen(true)}
-            title="快捷指令"
+            className="qa-icon-btn qa-toggle-btn"
+            onClick={handleToggleExpand}
+            title="展开工具栏"
           >
-            <Command size={13} strokeWidth={2} />
+            <ChevronsLeft size={12} strokeWidth={2.5} />
           </button>
-        ) : (
-          <div className={`quick-actions-panel${fmOpen ? ' fm-open' : ''}`}>
-            <div className="quick-actions-header">
-              <span className="quick-actions-title">
-                <Terminal size={11} strokeWidth={2} />
-                快捷指令
-              </span>
-              <button
-                className="quick-actions-close"
-                onClick={() => setOpen(false)}
-                title="收起"
-              >
-                <X size={12} strokeWidth={2.5} />
-              </button>
-            </div>
-
-            <div className="quick-actions-section">
-              <div className="quick-actions-section-title">系统速查（弹窗展示）</div>
-              <div className="quick-actions-buttons">
-                <button
-                  className="quick-action-btn"
-                  onClick={() => handleOpenSysInfo('cpu')}
-                  title="查看 CPU 占用及各进程详情"
-                >
-                  <Cpu size={11} strokeWidth={2} />
-                  CPU
-                </button>
-                <button
-                  className="quick-action-btn"
-                  onClick={() => handleOpenSysInfo('memory')}
-                  title="查看内存占用及各进程详情"
-                >
-                  <Database size={11} strokeWidth={2} />
-                  内存
-                </button>
-                <button
-                  className="quick-action-btn"
-                  onClick={() => handleOpenSysInfo('disk')}
-                  title="查看磁盘占用情况"
-                >
-                  <HardDrive size={11} strokeWidth={2} />
-                  磁盘
-                </button>
-              </div>
-            </div>
-
-            <div className="quick-actions-section">
-              <div className="quick-actions-section-title">常用指令（双击输入）</div>
-              <div className="quick-actions-scroll">
-                {COMMAND_CATEGORIES.map(cat => (
-                  <div key={cat.title} className="quick-actions-cat">
-                    <div className="quick-actions-cat-title">{cat.title}</div>
-                    <div className="quick-actions-cat-items">
-                      {cat.items.map(item => (
-                        <div
-                          key={item.label}
-                          className="quick-actions-item"
-                          onDoubleClick={() => handleInput(item.command)}
-                          title={item.description || `双击输入: ${item.command}`}
-                        >
-                          <code className="quick-actions-item-cmd">{item.command}</code>
-                          <span className="quick-actions-item-label">{item.label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        )}
+        {/* Expanded state: all buttons slide in from the right */}
+        {expanded && (
+          <>
+            <button
+              className="qa-icon-btn qa-slide-in"
+              style={{ animationDelay: '0ms' }}
+              onClick={() => setSysInfoType('cpu')}
+              title="CPU"
+            >
+              <Cpu size={10} strokeWidth={2} />
+            </button>
+            <button
+              className="qa-icon-btn qa-slide-in"
+              style={{ animationDelay: '50ms' }}
+              onClick={() => setSysInfoType('memory')}
+              title="内存"
+            >
+              <Database size={10} strokeWidth={2} />
+            </button>
+            <button
+              className="qa-icon-btn qa-slide-in"
+              style={{ animationDelay: '100ms' }}
+              onClick={() => setSysInfoType('disk')}
+              title="磁盘"
+            >
+              <HardDrive size={10} strokeWidth={2} />
+            </button>
+            <button
+              className={`qa-icon-btn qa-slide-in${activePopup === 'commands' ? ' active' : ''}`}
+              style={{ animationDelay: '150ms' }}
+              onClick={() => togglePopup('commands')}
+              title="常用指令"
+            >
+              <BookText size={10} strokeWidth={2} />
+            </button>
+            <button
+              className={`qa-icon-btn qa-slide-in${activePopup === 'history' ? ' active' : ''}`}
+              style={{ animationDelay: '200ms' }}
+              onClick={() => togglePopup('history')}
+              title="历史命令"
+            >
+              <Clock size={10} strokeWidth={2} />
+            </button>
+            <button
+              className="qa-icon-btn qa-slide-in qa-collapse-btn"
+              style={{ animationDelay: '250ms' }}
+              onClick={handleToggleExpand}
+              title="收起工具栏"
+            >
+              <ChevronsRight size={10} strokeWidth={2.5} />
+            </button>
+          </>
         )}
       </div>
+
+      {activePopup === 'commands' && (
+        <CommandsPopup
+          fmOpen={fmOpen}
+          onInput={(cmd) => {
+            onWrite(cmd)
+            setActivePopup(null)
+          }}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
+
+      {activePopup === 'history' && (
+        <HistoryPopup
+          sessionId={sessionId}
+          fmOpen={fmOpen}
+          onExecute={(cmd) => {
+            onWrite(cmd + '\r')
+            setActivePopup(null)
+          }}
+          onInput={(cmd) => {
+            onWrite(cmd)
+            setActivePopup(null)
+          }}
+          onClose={() => setActivePopup(null)}
+        />
+      )}
 
       {sysInfoType && (
         <SystemInfoModal
           sessionId={sessionId}
           type={sysInfoType}
-          onClose={handleCloseSysInfo}
+          onClose={() => setSysInfoType(null)}
         />
       )}
     </>
+  )
+}
+
+/* ── Commands Popup ─────────────────────────────────────────────────────── */
+
+function CommandsPopup({
+  fmOpen,
+  onInput,
+  onClose,
+}: {
+  fmOpen?: boolean
+  onInput: (cmd: string) => void
+  onClose: () => void
+}) {
+  return (
+    <div className={`qa-popup${fmOpen ? ' fm-open' : ''}`}>
+      <div className="qa-popup-header">
+        <span className="qa-popup-title">常用指令（双击输入）</span>
+        <button className="qa-popup-close" onClick={onClose} title="关闭">
+          <X size={12} strokeWidth={2.5} />
+        </button>
+      </div>
+      <div className="qa-popup-scroll">
+        {COMMAND_CATEGORIES.map(cat => (
+          <div key={cat.title} className="qa-cat">
+            <div className="qa-cat-title">{cat.title}</div>
+            <div className="qa-cat-items">
+              {cat.items.map(item => (
+                <div
+                  key={item.label}
+                  className="qa-item"
+                  onDoubleClick={() => onInput(item.command)}
+                  title={`双击输入: ${item.command}`}
+                >
+                  <code className="qa-item-cmd">{item.command}</code>
+                  <span className="qa-item-label">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ── History Popup ──────────────────────────────────────────────────────── */
+
+function parseHistory(output: string): string[] {
+  const lines = output.trim().split('\n')
+  const result: string[] = []
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+    // zsh_history format: ": 1234567890:0;command"
+    const zshMatch = trimmed.match(/^:\s*\d+:\d+;(.+)$/)
+    if (zshMatch) {
+      result.push(zshMatch[1])
+      continue
+    }
+    // bash history with line numbers: "  123  command"
+    const numberedMatch = trimmed.match(/^\s*\d+\s+(.+)$/)
+    if (numberedMatch) {
+      result.push(numberedMatch[1])
+      continue
+    }
+    // plain line (bash_history without numbers)
+    result.push(trimmed)
+  }
+  return result.slice(-200) // keep last 200
+}
+
+function HistoryPopup({
+  sessionId,
+  fmOpen,
+  onExecute,
+  onInput,
+  onClose,
+}: {
+  sessionId: string
+  fmOpen?: boolean
+  onExecute: (cmd: string) => void
+  onInput: (cmd: string) => void
+  onClose: () => void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [commands, setCommands] = useState<string[]>([])
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const loadHistory = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const output = await invoke<string>('execute_remote_command', {
+        sessionId,
+        command: 'cat ~/.zsh_history 2>/dev/null || cat ~/.bash_history 2>/dev/null || echo ""',
+      })
+      setCommands(parseHistory(output))
+    } catch (e: any) {
+      setError(String(e))
+    } finally {
+      setLoading(false)
+    }
+  }, [sessionId])
+
+  useEffect(() => {
+    loadHistory()
+  }, [loadHistory])
+
+  useEffect(() => {
+    if (!loading && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [loading])
+
+  return (
+    <div className={`qa-popup qa-popup-history${fmOpen ? ' fm-open' : ''}`}>
+      <div className="qa-popup-header">
+        <span className="qa-popup-title">历史命令</span>
+        <button className="qa-popup-close" onClick={onClose} title="关闭">
+          <X size={12} strokeWidth={2.5} />
+        </button>
+      </div>
+      <div className="qa-popup-scroll" ref={scrollRef}>
+        {loading && (
+          <div className="qa-history-loading">
+            <Loader2 size={14} className="qa-spin" />
+            <span>加载中...</span>
+          </div>
+        )}
+        {error && (
+          <div className="qa-history-error">
+            <span>{error}</span>
+            <button className="qa-history-retry" onClick={loadHistory}>重试</button>
+          </div>
+        )}
+        {!loading && !error && commands.length === 0 && (
+          <div className="qa-history-empty">无历史命令</div>
+        )}
+        {!loading && !error && commands.map((cmd, i) => (
+          <div key={`${i}-${cmd}`} className="qa-history-item">
+            <code
+              className="qa-history-cmd"
+              onDoubleClick={() => onInput(cmd)}
+              title={cmd}
+            >
+              {cmd}
+            </code>
+            <button
+              className="qa-history-exec"
+              onClick={() => onExecute(cmd)}
+              title="执行此命令"
+            >
+              <Play size={10} strokeWidth={2.5} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
