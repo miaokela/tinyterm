@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 
 import { useStore } from '../store'
+import ElectricBorder from './ElectricBorder'
 import './FileManager.css'
 
 interface Props {
@@ -373,8 +374,20 @@ function TransferQueue({ transfers, onCancel }: { transfers: TransferProgress[];
           const showPercent = transferring ? currentPercent : overallPercent
           const actionLabel = dir === 'upload' ? '正在上传' : '正在下载'
 
+          const isTransferring = !!transferring
+
           return (
-            <div key={groupId} className="fm-tc-row">
+            <ElectricBorder
+              key={groupId}
+              active={isTransferring}
+              color={hasError ? '#e53935' : '#FFD700'}
+              speed={1.2}
+              chaos={0.08}
+              borderRadius={6}
+              offset={3}
+              style={{ marginBottom: 4 }}
+            >
+            <div className="fm-tc-row">
               {/* Region 1: Currently transferring */}
               <div className="fm-tc-region fm-tc-region--active">
                 <span className="fm-tc-dir">
@@ -419,6 +432,7 @@ function TransferQueue({ transfers, onCancel }: { transfers: TransferProgress[];
                 <X size={12} strokeWidth={2.5} />
               </button>
             </div>
+            </ElectricBorder>
           )
         }
 
@@ -426,9 +440,20 @@ function TransferQueue({ transfers, onCancel }: { transfers: TransferProgress[];
         return items.filter(t => t.status !== 'done').map(item => {
           const percent = item.total > 0 ? Math.min(100, Math.round((item.transferred / item.total) * 100)) : 0
           const isError = item.status === 'error' || item.status === 'conflict'
+          const isActive = item.status === 'transferring'
 
           return (
-            <div key={item.id} className="fm-tc-row">
+            <ElectricBorder
+              key={item.id}
+              active={isActive}
+              color={isError ? '#e53935' : '#FFD700'}
+              speed={1.2}
+              chaos={0.08}
+              borderRadius={6}
+              offset={3}
+              style={{ marginBottom: 4 }}
+            >
+            <div className="fm-tc-row">
               <div className="fm-tc-region fm-tc-region--active">
                 <span className="fm-tc-dir">
                   {item.direction === 'upload'
@@ -466,6 +491,7 @@ function TransferQueue({ transfers, onCancel }: { transfers: TransferProgress[];
                 </button>
               )}
             </div>
+            </ElectricBorder>
           )
         })
       })}
