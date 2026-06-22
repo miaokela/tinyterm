@@ -176,9 +176,7 @@ export default function ElectricBorder({
     const borderOffset = offset
 
     // Flowing arc configuration — fewer, longer arcs that move smoothly
-    const NUM_ARCS = 3
-    const arcConfigs = [
-      { baseLen: 0.18, baseSpeed: 0.08, phase: 0,       noiseSeed: 0 },
+    const seLen: 0.18, baseSpeed: 0.08, phase: 0,       noiseSeed: 0 },
       { baseLen: 0.14, baseSpeed: 0.06, phase: 2.094,   noiseSeed: 50 },
       { baseLen: 0.22, baseSpeed: 0.10, phase: 4.189,   noiseSeed: 100 },
     ]
