@@ -1,6 +1,6 @@
 [package]
 name = "tinyterm"
-version = "1.0.16"
+version = "1.0.17"
 description = "TinyTerm - SSH Terminal Client"
 authors = ["TinyTerm"]
 edition = "2021"

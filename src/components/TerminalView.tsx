@@ -168,6 +168,12 @@ export function TerminalView({ session, isVisible, backendSessionId }: Props) {
       fitAddon.fit()
     }
 
+    // Focus the terminal textarea so a freshly opened window is immediately
+    // ready for keyboard input without requiring a mouse click.
+    if (visibleRef.current) {
+      term.focus()
+    }
+
     xtermRef.current = term
     fitAddonRef.current = fitAddon
 
@@ -369,6 +375,10 @@ export function TerminalView({ session, isVisible, backendSessionId }: Props) {
       if (container.clientWidth === 0 || container.clientHeight === 0) return
 
       fitAddon.fit()
+
+      // Refocus when the tab becomes visible so typing is immediately ready
+      // after switching to an existing session.
+      term.focus()
 
       if (resolvedSessionId) {
         invoke('resize_terminal', {
