@@ -79,24 +79,44 @@ function ContextMenu({
   deleteLabel?: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState({ x: menu.x, y: menu.y })
+
   useEffect(() => {
     const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) onClose() }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [onClose])
 
+  // Clamp the menu inside the window so right-clicking a file near the bottom /
+  // right edge doesn't push it off-screen. Runs before paint to avoid flicker.
+  useLayoutEffect(() => {
+    const node = ref.current
+    if (!node) return
+    const rect = node.getBoundingClientRect()
+    const zoomValue = Number(getComputedStyle(document.documentElement).zoom || '1')
+    const zoom = Number.isFinite(zoomValue) && zoomValue > 0 ? zoomValue : 1
+    const margin = 4
+    const vw = window.innerWidth / zoom
+    const vh = window.innerHeight / zoom
+    const mw = rect.width / zoom
+    const mh = rect.height / zoom
+    const nextX = Math.min(menu.x, Math.max(margin, vw - mw - margin))
+    const nextY = Math.min(menu.y, Math.max(margin, vh - mh - margin))
+    setPosition({ x: nextX, y: nextY })
+  }, [menu.x, menu.y])
+
   const menuNode = (
     <div
       ref={ref}
       className="fm-ctx-menu glass-panel"
-      style={{ position: 'fixed', top: menu.y, left: menu.x, zIndex: 2000 }}
+      style={{ position: 'fixed', top: position.y, left: position.x, zIndex: 2000 }}
     >
       <div className="fm-ctx-item" onClick={() => { onRename(menu.file, menu.side); onClose() }}>
-        <Pencil size={12} strokeWidth={1.8} /> 重命名
+        <Pencil size={11} strokeWidth={1.8} /> 重命名
       </div>
       <div className="fm-ctx-divider" />
       <div className="fm-ctx-item danger" onClick={() => { onDelete(menu.file, menu.side); onClose() }}>
-        <Trash2 size={12} strokeWidth={1.8} /> {deleteLabel}
+        <Trash2 size={11} strokeWidth={1.8} /> {deleteLabel}
       </div>
     </div>
   )

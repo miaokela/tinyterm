@@ -746,8 +746,8 @@
 /* ── Context menu ─────────────────────────────────────────────────────────── */
 
 .fm-ctx-menu {
-  min-width: 140px;
-  padding: 4px;
+  min-width: 120px;
+  padding: 3px;
   border-radius: var(--radius-md);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), var(--shadow-glow);
 }
@@ -755,9 +755,9 @@
 .fm-ctx-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  font-size: 12px;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
   color: var(--color-text-primary);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -780,7 +780,7 @@
 .fm-ctx-divider {
   height: 1px;
   background: var(--color-border);
-  margin: 3px 2px;
+  margin: 2px 2px;
 }
 
 /* ── Collapsed state ──────────────────────────────────────────────────────── */
