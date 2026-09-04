@@ -1,6 +1,6 @@
 {
   "productName": "TinyTerm",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "identifier": "com.tinyterm.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -22,9 +22,7 @@
         "decorations": true,
         "transparent": false,
         "resizable": true,
-        "fullscreen": false,
-        "hiddenTitle": true,
-        "titleBarStyle": "Overlay"
+        "fullscreen": false
       }
     ],
     "macOSPrivateApi": true,

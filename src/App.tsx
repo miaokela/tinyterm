@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Plus, X, Server, ChevronLeft, ChevronRight, Loader2, PanelRight } from 'lucide-react'
 import logoSrc from './assets/logo.png'
 import { useStore } from './store'
-import { Toolbar } from './components/Toolbar'
 import { TerminalView } from './components/TerminalView'
 import { FileManager } from './components/FileManager'
 import { CredentialsModal } from './components/CredentialsModal'
@@ -278,9 +277,6 @@ export default function App() {
   return (
     <div className="app-root">
       <div className="app-container">
-        {/* ── Top toolbar (centered pill) ───────────────── */}
-        <Toolbar />
-
         {/* ── Body: sidebar + content ───────────────────── */}
         <div className="app-body">
 
@@ -381,7 +377,7 @@ export default function App() {
                   </div>
                   <h2>TinyTerm</h2>
                   <p>
-                    点击左侧 <strong>添加主机</strong> 或顶部 <strong>主机</strong> 开始连接
+                    点击左侧 <strong>添加主机</strong> 开始连接
                   </p>
                 </div>
               </div>

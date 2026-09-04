@@ -145,7 +145,7 @@ function CredentialRow({
 
 type CredentialFormData = Omit<Profile, 'id' | 'created_at' | 'password_encrypted'>
 
-function CredentialForm({
+export function CredentialForm({
   credential, onSave, onCancel,
 }: {
   credential: Profile | null

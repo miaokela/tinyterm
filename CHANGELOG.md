@@ -5,6 +5,13 @@ All notable changes to TinyTerm will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.18] - 2026-09-04
+
+### Changed
+- 移除顶部“凭据/主机”按钮组及拖拽区域
+- 恢复 macOS / Windows 默认原生顶部标题栏框架
+- Host 表单内 Credential 区域升级为可 CRUD 管理：新增“新增”按钮，每个选项提供编辑/删除按钮，以二级弹窗复用原凭证表单
+
 ## [1.0.8] - 2026-05-22
 
 ### Changed

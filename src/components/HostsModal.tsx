@@ -4,6 +4,7 @@ import {
   X, Plus, PlugZap, Pencil, Trash2, Server, Search, ChevronRight, AlertCircle, Copy,
 } from 'lucide-react'
 import { useStore } from '../store'
+import { CredentialForm } from './CredentialsModal'
 import type { Bookmark, Profile } from '../types'
 
 type HostFormData = {
@@ -287,6 +288,10 @@ function HostForm({
   const [form, setForm] = useState<HostFormData>(defaultForm(host ?? undefined))
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string>()
+  const [credFormOpen, setCredFormOpen] = useState(false)
+  const [editingCred, setEditingCred] = useState<Profile | null>(null)
+  const { createProfile, updateProfile, deleteProfile, openConfirmDialog } = useStore()
+
   const isDuplicate = host ? !host.id : false
   const formTitle = isDuplicate ? '复制 Host' : host ? '编辑 Host' : '新建 Host'
 
@@ -300,6 +305,29 @@ function HostForm({
     setError(undefined)
     setSaving(true)
     try { await onSave(form) } catch (e: any) { setError(String(e)) } finally { setSaving(false) }
+  }
+
+  const handleCredSave = async (data: Omit<Profile, 'id' | 'created_at' | 'password_encrypted'>) => {
+    if (editingCred) {
+      await updateProfile({ ...editingCred, ...data, password_encrypted: false })
+    } else {
+      await createProfile(data)
+    }
+    setCredFormOpen(false)
+    setEditingCred(null)
+  }
+
+  const handleCredDelete = async (id: string) => {
+    const confirmed = await openConfirmDialog({
+      title: '删除 Credential',
+      message: '确认删除该认证配置？',
+      confirmText: '删除',
+      cancelText: '取消',
+    })
+    if (!confirmed) return
+    await deleteProfile(id)
+    // 若被删除的是当前选中的凭证，清空选择
+    if (form.profile_id === id) set('profile_id', '')
   }
 
   return (
@@ -335,9 +363,21 @@ function HostForm({
             </div>
           </div>
 
-          {/* Credential — optional */}
+          {/* Credential — managed list with CRUD */}
           <div className="hf-field full">
-            <label className="hf-label">Credential（可选）</label>
+            <div className="hf-cred-header">
+              <label className="hf-label">Credential（可选）</label>
+              <button
+                className="hf-cred-add"
+                type="button"
+                onClick={() => { setEditingCred(null); setCredFormOpen(true) }}
+                title="新建 Credential"
+                aria-label="新建 Credential"
+              >
+                <Plus size={13} strokeWidth={2.4} />
+                <span>新增</span>
+              </button>
+            </div>
             {credentials.length === 0 ? (
               <div className="hf-no-cred" style={{ opacity: 0.7 }}>
                 暂无 Credential，连接时将提示输入用户名和密码
@@ -345,21 +385,45 @@ function HostForm({
             ) : (
               <div className="hf-cred-list">
                 {credentials.map(c => (
-                  <button
+                  <div
                     key={c.id}
                     className={`hf-cred-item${form.profile_id === c.id ? ' selected' : ''}`}
-                    onClick={() => set('profile_id', form.profile_id === c.id ? '' : c.id)}
-                    type="button"
                   >
-                    <span className="hf-cred-dot">
-                      {c.auth_type === 'privateKey' ? 'KEY' : 'PWD'}
-                    </span>
-                    <span className="hf-cred-name">{c.title}</span>
-                    <span className="hf-cred-user">{c.username}</span>
-                    {form.profile_id === c.id && (
-                      <ChevronRight size={13} className="hf-cred-check" />
-                    )}
-                  </button>
+                    <button
+                      className="hf-cred-select"
+                      type="button"
+                      onClick={() => set('profile_id', form.profile_id === c.id ? '' : c.id)}
+                    >
+                      <span className="hf-cred-dot">
+                        {c.auth_type === 'privateKey' ? 'KEY' : 'PWD'}
+                      </span>
+                      <span className="hf-cred-name">{c.title}</span>
+                      <span className="hf-cred-user">{c.username}</span>
+                      {form.profile_id === c.id && (
+                        <ChevronRight size={13} className="hf-cred-check" />
+                      )}
+                    </button>
+                    <div className="hf-cred-actions">
+                      <button
+                        className="hf-cred-action"
+                        type="button"
+                        title="编辑"
+                        aria-label="编辑 Credential"
+                        onClick={() => { setEditingCred(c); setCredFormOpen(true) }}
+                      >
+                        <Pencil size={12} strokeWidth={1.8} />
+                      </button>
+                      <button
+                        className="hf-cred-action danger"
+                        type="button"
+                        title="删除"
+                        aria-label="删除 Credential"
+                        onClick={() => handleCredDelete(c.id)}
+                      >
+                        <Trash2 size={12} strokeWidth={1.8} />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -410,6 +474,14 @@ function HostForm({
           </div>
         </div>
       </div>
+
+      {credFormOpen && (
+        <CredentialForm
+          credential={editingCred}
+          onSave={handleCredSave}
+          onCancel={() => { setCredFormOpen(false); setEditingCred(null) }}
+        />
+      )}
     </div>
   )
 }
