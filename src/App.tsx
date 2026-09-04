@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Plus, X, Server, ChevronLeft, ChevronRight, Loader2, PanelRight } from 'lucide-react'
+import { Plus, X, Server, ChevronLeft, ChevronRight, Loader2, PanelRight, Settings } from 'lucide-react'
 import logoSrc from './assets/logo.png'
 import { useStore } from './store'
 import { TerminalView } from './components/TerminalView'
@@ -338,18 +338,18 @@ export default function App() {
                 <button
                   className="host-sidebar-add-icon"
                   onClick={openHostsModal}
-                  title="添加主机"
+                  title="主机管理"
                 >
-                  <Plus size={14} strokeWidth={2.5} />
+                  <Settings size={14} strokeWidth={2.5} />
                 </button>
               ) : (
                 <button
                   className="host-sidebar-add"
                   onClick={openHostsModal}
-                  title="添加主机"
+                  title="主机管理"
                 >
-                  <Plus size={13} strokeWidth={2.5} />
-                  <span>添加主机</span>
+                  <Settings size={13} strokeWidth={2.5} />
+                  <span>主机管理</span>
                 </button>
               )}
             </div>
@@ -377,7 +377,7 @@ export default function App() {
                   </div>
                   <h2>TinyTerm</h2>
                   <p>
-                    点击左侧 <strong>添加主机</strong> 开始连接
+                    点击左侧 <strong>主机管理</strong> 添加主机并开始连接
                   </p>
                 </div>
               </div>
